@@ -1,0 +1,54 @@
+# Training config for ECAPA-TDNN with AAM-Softmax
+# Launch: python scripts/run_train.py --config configs/train_ecapa.yaml
+
+experiment_name: ecapa_tdnn_aamsoft
+
+data:
+  data_root: data/          # root with train/ and test_public/
+  train_csv: "extracted_data/Для участников/train.csv"
+  n_val_speakers: 500
+  seed: 42
+
+model:
+  n_mels: 80
+  channels: 512             # use 1024 for larger model
+  emb_dim: 192
+  scale: 8                  # Res2 scale
+  sr: 16000
+
+loss:
+  type: aam_softmax         # aam_softmax | subcenter_arcface
+  margin: 0.2
+  scale: 30.0
+  subcenter_k: 3            # only for subcenter_arcface
+
+training:
+  bf16: true                # BF16 autocast (RTX 3090 Ampere)
+  lr: 1.0e-3
+  weight_decay: 2.0e-5
+  batch_size: 256
+  num_workers: 8
+  epochs: 30
+  chunk_s: 3.0              # seconds per training clip
+  warmup_epochs: 2
+  grad_clip: 5.0
+  target_sr: 16000
+
+augmentation:
+  enabled: true
+  p_white_noise: 0.3
+  p_pink_noise: 0.2
+  p_file_noise: 0.4         # requires noise_files
+  p_rir: 0.5                # requires rir_files
+  p_telephone: 0.3
+  p_codec: 0.2
+  p_speed: 0.3
+  p_volume: 0.5
+  noise_snr_min: 0
+  noise_snr_max: 20
+  noise_dir: null           # path to dir with noise .wav/.flac files
+  rir_dir: null             # path to dir with RIR .wav files
+
+checkpoint:
+  dir: weights/
+  log_file: results/experiments.jsonl

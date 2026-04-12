@@ -1,0 +1,57 @@
+# ECAPA-TDNN v2: реальные шумы + RIR + дообучение с чекпоинта
+# Launch:
+#   bash scripts/run.sh scripts/run_train.py \
+#       --config configs/train_ecapa_v2.yaml \
+#       --resume weights/ecapa_tdnn_aamsoft_best.pt
+
+experiment_name: ecapa_tdnn_v2_realaugment
+
+data:
+  data_root: data/
+  train_csv: "extracted_data/Для участников/train.csv"
+  n_val_speakers: 500
+  seed: 42
+
+model:
+  n_mels: 80
+  channels: 512
+  emb_dim: 192
+  scale: 8
+  sr: 16000
+
+loss:
+  type: subcenter_arcface   # лучше справляется с clean vs noisy вариацией
+  margin: 0.2
+  scale: 30.0
+  subcenter_k: 3
+
+training:
+  bf16: true                # BF16 autocast (RTX 3090 Ampere)
+  lr: 2.0e-4                # меньше LR при дообучении
+  weight_decay: 2.0e-5
+  batch_size: 256
+  num_workers: 8
+  epochs: 20                # 20 дополнительных эпох
+  chunk_s: 3.0
+  warmup_epochs: 1          # короткий warmup при дообучении
+  grad_clip: 5.0
+  target_sr: 16000
+
+augmentation:
+  enabled: true
+  p_white_noise: 0.2
+  p_pink_noise: 0.1
+  p_file_noise: 0.5         # реальные шумы из MUSAN
+  p_rir: 0.6                # реальная реверберация из RIR
+  p_telephone: 0.3
+  p_codec: 0.2
+  p_speed: 0.3
+  p_volume: 0.5
+  noise_snr_min: 0
+  noise_snr_max: 15
+  noise_dir: data/musan_raw/musan/noise   # реальные шумы
+  rir_dir:   data/rir_raw/RIRS_NOISES/simulated_rirs  # RIR
+
+checkpoint:
+  dir: weights/
+  log_file: results/experiments.jsonl

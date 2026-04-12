@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Data (large files)
+data/
+embeddings/
+weights/
+submission.csv
+
+# Notebooks checkpoints
+notebooks/.ipynb_checkpoints/
+
+# Results (keep structure, not binary)
+results/*.npy
+
+# Secrets / env
+.env
