@@ -1,0 +1,88 @@
+2026-04-13 17:29:08,007 - modelscope - INFO - Use user-specified model revision: v1.0.2
+2026-04-13 17:29:11,143 - modelscope - INFO - Use user-specified model revision: v1.0.2
+2026-04-13 17:29:11,397 - modelscope - INFO - initiate model from /home/s0ft44/.cache/modelscope/hub/models/damo/speech_campplus_sv_en_voxceleb_16k
+2026-04-13 17:29:11,397 - modelscope - INFO - initiate model from location /home/s0ft44/.cache/modelscope/hub/models/damo/speech_campplus_sv_en_voxceleb_16k.
+2026-04-13 17:29:11,398 - modelscope - INFO - initialize model from /home/s0ft44/.cache/modelscope/hub/models/damo/speech_campplus_sv_en_voxceleb_16k
+[tta_infer] Crop positions: ['0.00', '0.50', '1.00']
+[tta_infer] Loading campplus from weights/campplus_finetune_best.pt...
+Downloading Model from https://www.modelscope.cn to directory: /home/s0ft44/.cache/modelscope/hub/models/damo/speech_campplus_sv_en_voxceleb_16k
+Traceback (most recent call last):
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/utils/registry.py", line 209, in build_from_cfg
+    return obj_cls._instantiate(**args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/models/base/base_model.py", line 85, in _instantiate
+    return cls(**kwargs)
+           ^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/models/audio/sv/DTDNN.py", line 173, in __init__
+    self.embedding_model.to(self.device)
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1343, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 903, in _apply
+    module._apply(fn)
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 903, in _apply
+    module._apply(fn)
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 930, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1329, in convert
+    return t.to(
+           ^^^^^
+RuntimeError: CUDA error: out of memory
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/utils/registry.py", line 211, in build_from_cfg
+    return obj_cls(**args)
+           ^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/pipelines/audio/speaker_verification_light_pipeline.py", line 49, in __init__
+    super().__init__(model=model, **kwargs)
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/pipelines/base.py", line 104, in __init__
+    self.model = self.initiate_single_model(model, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/pipelines/base.py", line 56, in initiate_single_model
+    return Model.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/models/base/base_model.py", line 217, in from_pretrained
+    model = build_model(
+            ^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/models/builder.py", line 35, in build_model
+    model = build_from_cfg(
+            ^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/utils/registry.py", line 214, in build_from_cfg
+    raise type(e)(f'{obj_cls.__name__}: {e}') from e
+RuntimeError: SpeakerVerificationCAMPPlus: CUDA error: out of memory
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/s0ft44/projects/ASR/scripts/run_tta_infer.py", line 201, in <module>
+    main()
+  File "/home/s0ft44/projects/ASR/scripts/run_tta_infer.py", line 113, in main
+    model = CAMPlusWrapper(freeze_frontend=False, emb_dim=args.emb_dim)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/src/models/campplus_wrapper.py", line 38, in __init__
+    pipe = pipeline(
+           ^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/pipelines/builder.py", line 229, in pipeline
+    return build_pipeline(cfg, task_name=task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/pipelines/builder.py", line 69, in build_pipeline
+    return build_from_cfg(
+           ^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/modelscope/utils/registry.py", line 214, in build_from_cfg
+    raise type(e)(f'{obj_cls.__name__}: {e}') from e
+RuntimeError: SpeakerVerificationPipeline: SpeakerVerificationCAMPPlus: CUDA error: out of memory
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
