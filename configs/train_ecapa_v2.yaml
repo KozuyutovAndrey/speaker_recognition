@@ -31,7 +31,7 @@ training:
   weight_decay: 2.0e-5
   batch_size: 256
   num_workers: 8
-  epochs: 20                # 20 дополнительных эпох
+  epochs: 30                # 30 дополнительных эпох
   chunk_s: 3.0
   warmup_epochs: 1          # короткий warmup при дообучении
   grad_clip: 5.0

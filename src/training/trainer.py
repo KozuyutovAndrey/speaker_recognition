@@ -84,18 +84,33 @@ class Trainer:
         """Load encoder + optimizer + scheduler state to continue training."""
         ckpt = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
         self.encoder.load_state_dict(ckpt["encoder_state"])
-        # loss_fn weights (AAM-Softmax class centers) — load only if n_classes matches
+
+        # Try loading loss weights (fails if loss type or n_classes changed)
+        loss_ok = True
         try:
             self.loss_fn.load_state_dict(ckpt["loss_state"])
         except RuntimeError as e:
-            print(f"[Trainer] WARNING: could not load loss state ({e}). Reinitializing loss.")
-        self.optimizer.load_state_dict(ckpt["optimizer_state"])
-        if "scheduler_state" in ckpt:
-            self.scheduler.load_state_dict(ckpt["scheduler_state"])
+            print(f"[Trainer] WARNING: loss state mismatch ({e}). Reinitializing loss + optimizer.")
+            loss_ok = False
+
+        # Load optimizer only if loss is compatible; otherwise reinitialize
+        if loss_ok:
+            try:
+                self.optimizer.load_state_dict(ckpt["optimizer_state"])
+                if "scheduler_state" in ckpt:
+                    self.scheduler.load_state_dict(ckpt["scheduler_state"])
+            except RuntimeError as e:
+                print(f"[Trainer] WARNING: optimizer state mismatch ({e}). Reinitializing optimizer.")
+        else:
+            print("[Trainer] Optimizer reinitialized (new loss function).")
         self.best_p10 = ckpt["metrics"].get("P@10", 0.0)
-        self.start_epoch = ckpt.get("epoch", 0) + 1
-        print(f"[Trainer] Resumed from epoch {ckpt.get('epoch')}, "
-              f"best P@10={self.best_p10:.4f}, next epoch={self.start_epoch}")
+        resumed_epoch = ckpt.get("epoch", 0)
+        self.start_epoch = resumed_epoch + 1
+        # Extend total epochs: run cfg["epochs"] MORE epochs from checkpoint
+        self.cfg["epochs"] = resumed_epoch + self.cfg["epochs"]
+        print(f"[Trainer] Resumed from epoch {resumed_epoch}, "
+              f"best P@10={self.best_p10:.4f}, "
+              f"will train epochs {self.start_epoch}→{self.cfg['epochs']}")
 
     # ------------------------------------------------------------------
     # Setup

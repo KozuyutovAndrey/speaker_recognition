@@ -8,6 +8,7 @@ build/
 
 # Data (large files)
 data/
+extracted_data/
 embeddings/
 weights/
 submission.csv

@@ -75,6 +75,8 @@ def main():
     parser.add_argument("--config", required=True, help="Path to YAML config")
     parser.add_argument("--resume", default=None,
                         help="Path to checkpoint to resume training from")
+    parser.add_argument("--reset-best", action="store_true",
+                        help="Reset best P@10 to 0 after resume (use when loss/augmentation changed)")
     parser.add_argument("overrides", nargs="*", help="OmegaConf dot-notation overrides")
     args = parser.parse_args()
 
@@ -163,6 +165,9 @@ def main():
 
     if args.resume:
         trainer.resume_from_checkpoint(args.resume)
+        if args.reset_best:
+            trainer.best_p10 = 0.0
+            print("[run_train] best_p10 reset to 0.0")
 
     trainer.fit()
 
