@@ -1,0 +1,59 @@
+# ECAPA-TDNN stage2 fine-tuning для 3-model ensemble
+# Продолжение с weights/ecapa_tdnn_v2_realaugment_best.pt
+# Запуск:
+#   bash scripts/run.sh scripts/run_train.py \
+#       --config configs/train_ecapa_stage2.yaml \
+#       --resume weights/ecapa_tdnn_v2_realaugment_best.pt --reset-best
+
+experiment_name: ecapa_tdnn_stage2
+
+data:
+  data_root: data/
+  train_csv: "extracted_data/Для участников/train.csv"
+  n_val_speakers: 500
+  seed: 42
+
+model:
+  n_mels: 80
+  channels: 512
+  emb_dim: 192
+  scale: 8
+  sr: 16000
+
+loss:
+  type: subcenter_arcface
+  margin: 0.2
+  scale: 30.0
+  subcenter_k: 3
+
+training:
+  bf16: true
+  lr: 1.0e-5
+  weight_decay: 2.0e-5
+  batch_size: 128
+  num_workers: 8
+  epochs: 10
+  chunk_s: 3.0
+  warmup_epochs: 0
+  grad_clip: 5.0
+  target_sr: 16000
+
+augmentation:
+  enabled: true
+  p_white_noise: 0.2
+  p_pink_noise: 0.1
+  p_file_noise: 0.5
+  p_rir: 0.6
+  p_telephone: 0.3
+  p_codec: 0.2
+  p_speed: 0.3
+  p_volume: 0.5
+  noise_snr_min: 0
+  noise_snr_max: 15
+  noise_dir: data/musan_raw/musan/noise
+  rir_dir:   data/rir_raw/RIRS_NOISES/simulated_rirs
+
+checkpoint:
+  dir: weights/
+  save_name: ecapa_stage2_best.pt
+  log_file: results/experiments.jsonl

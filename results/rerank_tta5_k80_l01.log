@@ -1,0 +1,24 @@
+[rerank] Loading embeddings...
+[rerank] emb-a: (134697, 512)
+[rerank] emb-b: (134697, 192)
+[rerank] blended: (134697, 704) (alpha=0.6)
+[rerank] k1=80, k2=6, lambda=0.1
+[reranking] FAISS top-161 search for 134697 queries...
+Traceback (most recent call last):
+  File "/home/s0ft44/projects/ASR/scripts/run_rerank.py", line 95, in <module>
+    main()
+  File "/home/s0ft44/projects/ASR/scripts/run_rerank.py", line 80, in main
+    neighbors = rerank_and_retrieve(
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/src/retrieval/reranking.py", line 57, in rerank_and_retrieve
+    topk_indices = _get_topk_faiss(embeddings, search_k)   # [N, search_k]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/s0ft44/projects/ASR/src/retrieval/reranking.py", line 19, in _get_topk_faiss
+    index.add(embeddings)
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/faiss/class_wrappers.py", line 274, in replacement_add
+    self.add_c(n, swig_ptr(x))
+  File "/home/s0ft44/projects/ASR/.venv/lib/python3.12/site-packages/faiss/swigfaiss.py", line 14176, in add
+    return _swigfaiss.GpuIndexFlat_add(self, arg2, x)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Error in virtual void* faiss::gpu::StandardGpuResourcesImpl::allocMemory(const faiss::gpu::AllocRequest&) at /project/faiss/faiss/gpu/StandardGpuResources.cpp:577: Error: 'err == cudaSuccess' failed: StandardGpuResources: alloc fail type FlatData dev 0 space Device stream 0x1f717580 size 379306752 bytes (cudaMalloc error out of memory [2])
+

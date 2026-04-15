@@ -73,7 +73,12 @@ def build_augmentation(cfg) -> AugmentationPipeline | None:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
-    parser.add_argument("--reset-best", action="store_true")
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume from checkpoint specified by --resume-from")
+    parser.add_argument("--resume-from", default=None,
+                        help="Path to checkpoint to resume from (required when --resume is set)")
+    parser.add_argument("--reset-best", action="store_true",
+                        help="Reset best P@10 to 0 after loading checkpoint (continue training)")
     parser.add_argument("overrides", nargs="*")
     args = parser.parse_args()
 
@@ -151,8 +156,15 @@ def main():
         experiment_name=cfg.experiment_name,
     )
 
+    if args.resume:
+        if not args.resume_from:
+            parser.error("--resume requires --resume-from <path>")
+        trainer.resume_from_checkpoint(args.resume_from)
+        print(f"[run_train_eres2net] Resumed from: {args.resume_from}")
+
     if args.reset_best:
         trainer.best_p10 = 0.0
+        print("[run_train_eres2net] best_p10 reset to 0.0")
 
     trainer.fit()
 

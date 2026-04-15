@@ -97,8 +97,11 @@ class Trainer:
         if loss_ok:
             try:
                 self.optimizer.load_state_dict(ckpt["optimizer_state"])
-                if "scheduler_state" in ckpt:
-                    self.scheduler.load_state_dict(ckpt["scheduler_state"])
+                # Override LR from current config — do NOT load scheduler state,
+                # so the scheduler restarts fresh with the new LR and epoch count.
+                for pg in self.optimizer.param_groups:
+                    pg["lr"] = self.cfg["lr"]
+                print(f"[Trainer] LR overridden to {self.cfg['lr']} (from config), scheduler restarted")
             except RuntimeError as e:
                 print(f"[Trainer] WARNING: optimizer state mismatch ({e}). Reinitializing optimizer.")
         else:

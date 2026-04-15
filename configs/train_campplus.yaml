@@ -1,0 +1,54 @@
+# CAM++ fine-tuning: претренированная модель Alibaba + наши данные + MUSAN/RIR
+# Launch:
+#   bash scripts/run.sh scripts/run_train_campplus.py \
+#       --config configs/train_campplus.yaml
+
+experiment_name: campplus_finetune
+
+data:
+  data_root: data/
+  train_csv: "extracted_data/Для участников/train.csv"
+  n_val_speakers: 500
+  seed: 42
+
+model:
+  emb_dim: 512              # CAM++ выдаёт 512-dim эмбеддинги
+  freeze_frontend: true     # не трогаем Kaldi.fbank, обучаем только embedding_model
+
+loss:
+  type: subcenter_arcface
+  margin: 0.2
+  scale: 30.0
+  subcenter_k: 3
+
+training:
+  bf16: true
+  lr: 1.0e-4                # меньший LR для fine-tuning претренированной модели
+  weight_decay: 2.0e-5
+  batch_size: 128           # CAM++ sequential fbank → меньший батч
+  num_workers: 8
+  epochs: 10
+  chunk_s: 3.0
+  warmup_epochs: 1
+  grad_clip: 5.0
+  target_sr: 16000
+
+augmentation:
+  enabled: true
+  p_white_noise: 0.2
+  p_pink_noise: 0.1
+  p_file_noise: 0.5
+  p_rir: 0.6
+  p_telephone: 0.3
+  p_codec: 0.2
+  p_speed: 0.3
+  p_volume: 0.5
+  noise_snr_min: 0
+  noise_snr_max: 15
+  noise_dir: data/musan_raw/musan/noise
+  rir_dir:   data/rir_raw/RIRS_NOISES/simulated_rirs
+
+checkpoint:
+  dir: weights/
+  save_name: campplus_finetune_best.pt
+  log_file: results/experiments.jsonl
