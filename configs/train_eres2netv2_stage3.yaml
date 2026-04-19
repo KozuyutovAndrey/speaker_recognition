@@ -1,0 +1,55 @@
+# ERes2NetV2 stage3 fine-tuning: минимальный LR
+# Запуск:
+#   bash scripts/run.sh scripts/run_train_eres2netv2.py \
+#       --config configs/train_eres2netv2_stage3.yaml \
+#       --resume --resume-from weights/eres2netv2_finetune_stage2_best.pt --reset-best
+
+experiment_name: eres2netv2_finetune_stage3
+
+data:
+  data_root: data/
+  train_csv: "extracted_data/Для участников/train.csv"
+  n_val_speakers: 500
+  seed: 42
+
+model:
+  emb_dim: 192
+  freeze_frontend: false
+
+loss:
+  type: subcenter_arcface
+  margin: 0.2
+  scale: 30.0
+  subcenter_k: 3
+
+training:
+  bf16: true
+  lr: 5.0e-6
+  weight_decay: 2.0e-5
+  batch_size: 128
+  num_workers: 8
+  epochs: 10
+  chunk_s: 3.0
+  warmup_epochs: 0
+  grad_clip: 5.0
+  target_sr: 16000
+
+augmentation:
+  enabled: true
+  p_white_noise: 0.2
+  p_pink_noise: 0.1
+  p_file_noise: 0.5
+  p_rir: 0.6
+  p_telephone: 0.3
+  p_codec: 0.2
+  p_speed: 0.3
+  p_volume: 0.5
+  noise_snr_min: 0
+  noise_snr_max: 15
+  noise_dir: data/musan_raw/musan/noise
+  rir_dir:   data/rir_raw/RIRS_NOISES/simulated_rirs
+
+checkpoint:
+  dir: weights/
+  save_name: eres2netv2_finetune_stage3_best.pt
+  log_file: results/experiments.jsonl

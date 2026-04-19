@@ -1,0 +1,57 @@
+# WavLM Large stage1: frozen backbone, train only head
+# Быстро (~3-4 ч), убеждаемся что пайплайн работает
+# Запуск:
+#   bash scripts/run.sh scripts/run_train_wavlm.py \
+#       --config configs/train_wavlm_stage1.yaml
+
+experiment_name: wavlm_stage1
+
+data:
+  data_root: data/
+  train_csv: "extracted_data/Для участников/train.csv"
+  n_val_speakers: 500
+  seed: 42
+
+model:
+  emb_dim: 192
+  freeze_backbone: true          # stage1: только голова обучается
+  use_grad_checkpointing: false  # не нужно при frozen backbone
+
+loss:
+  type: subcenter_arcface
+  margin: 0.2
+  scale: 30.0
+  subcenter_k: 3
+
+training:
+  bf16: true
+  lr: 1.0e-3
+  weight_decay: 2.0e-5
+  batch_size: 64
+  num_workers: 8
+  epochs: 10
+  chunk_s: 3.0
+  warmup_epochs: 1
+  grad_clip: 5.0
+  target_sr: 16000
+  grad_accumulation_steps: 1
+
+augmentation:
+  enabled: true
+  p_white_noise: 0.2
+  p_pink_noise: 0.1
+  p_file_noise: 0.5
+  p_rir: 0.6
+  p_telephone: 0.3
+  p_codec: 0.2
+  p_speed: 0.3
+  p_volume: 0.5
+  noise_snr_min: 0
+  noise_snr_max: 15
+  noise_dir: data/musan_raw/musan/noise
+  rir_dir:   data/rir_raw/RIRS_NOISES/simulated_rirs
+
+checkpoint:
+  dir: weights/
+  save_name: wavlm_stage1_best.pt
+  log_file: results/experiments.jsonl

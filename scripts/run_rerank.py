@@ -43,8 +43,11 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--emb-a",       required=True, help="Primary embeddings .npy")
     p.add_argument("--emb-b",       default=None,  help="Secondary embeddings .npy (optional)")
+    p.add_argument("--emb-c",       default=None,  help="Tertiary embeddings .npy (optional)")
     p.add_argument("--alpha",       type=float, default=0.6,
                    help="Weight for emb-a when blending (1-alpha for emb-b)")
+    p.add_argument("--gamma",       type=float, default=0.0,
+                   help="Weight for emb-c; alpha and (1-alpha-gamma) used for emb-a/emb-b")
     p.add_argument("--test-csv",    required=True)
     p.add_argument("--output",      default="submission_reranked.csv")
     p.add_argument("--k",           type=int, default=10)
@@ -65,7 +68,14 @@ def main():
     emb_a = l2(np.load(args.emb_a).astype(np.float32))
     print(f"[rerank] emb-a: {emb_a.shape}")
 
-    if args.emb_b:
+    if args.emb_b and args.emb_c:
+        emb_b = l2(np.load(args.emb_b).astype(np.float32))
+        emb_c = l2(np.load(args.emb_c).astype(np.float32))
+        print(f"[rerank] emb-b: {emb_b.shape}, emb-c: {emb_c.shape}")
+        beta = 1 - args.alpha - args.gamma
+        embeddings = l2(np.concatenate([args.alpha * emb_a, beta * emb_b, args.gamma * emb_c], axis=1))
+        print(f"[rerank] blended: {embeddings.shape} (alpha={args.alpha}, beta={beta:.2f}, gamma={args.gamma})")
+    elif args.emb_b:
         emb_b = l2(np.load(args.emb_b).astype(np.float32))
         print(f"[rerank] emb-b: {emb_b.shape}")
         embeddings = l2(np.concatenate([args.alpha * emb_a, (1 - args.alpha) * emb_b], axis=1))

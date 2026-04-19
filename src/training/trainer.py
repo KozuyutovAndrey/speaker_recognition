@@ -48,6 +48,7 @@ class Trainer:
         "log_file": "results/experiments.jsonl",
         "val_batch_size": 128,
         "grad_clip": 5.0,
+        "grad_accumulation_steps": 1,
     }
 
     def __init__(
@@ -193,25 +194,28 @@ class Trainer:
         self.loss_fn.train()
         total_loss = 0.0
 
+        accum_steps = self.cfg.get("grad_accumulation_steps", 1)
         bar = tqdm(self.train_loader, desc=f"Epoch {epoch}", leave=False)
-        for waveforms, labels in bar:
+        self.optimizer.zero_grad()
+        for step, (waveforms, labels) in enumerate(bar):
             waveforms = waveforms.to(self.device)
             labels = labels.to(self.device)
 
-            self.optimizer.zero_grad()
             with torch.autocast(device_type="cuda", dtype=self.autocast_dtype, enabled=self.use_autocast):
                 embeddings = self.encoder(waveforms)
                 loss = self.loss_fn(embeddings, labels)
-            loss.backward()
 
-            if self.cfg["grad_clip"] > 0:
-                nn.utils.clip_grad_norm_(
-                    list(self.encoder.parameters()) + list(self.loss_fn.parameters()),
-                    self.cfg["grad_clip"],
-                )
+            (loss / accum_steps).backward()
 
-            self.optimizer.step()
-            self.scheduler.step()
+            if (step + 1) % accum_steps == 0 or (step + 1) == len(self.train_loader):
+                if self.cfg["grad_clip"] > 0:
+                    nn.utils.clip_grad_norm_(
+                        list(self.encoder.parameters()) + list(self.loss_fn.parameters()),
+                        self.cfg["grad_clip"],
+                    )
+                self.optimizer.step()
+                self.scheduler.step()
+                self.optimizer.zero_grad()
 
             total_loss += loss.item()
             bar.set_postfix(loss=f"{loss.item():.4f}", lr=f"{self.scheduler.get_last_lr()[0]:.2e}")

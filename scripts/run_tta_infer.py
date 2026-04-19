@@ -74,7 +74,7 @@ def get_crop(wav: np.ndarray, chunk_samples: int, position: float) -> np.ndarray
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--checkpoint",   required=True)
-    p.add_argument("--model-type",   choices=["campplus", "eres2net"], default="campplus")
+    p.add_argument("--model-type",   choices=["campplus", "eres2net", "eres2netv2", "ecapa", "wavlm"], default="campplus")
     p.add_argument("--emb-dim",      type=int, default=512,
                    help="512 for CAM++, 192 for ERes2Net")
     p.add_argument("--data-root",    required=True)
@@ -111,9 +111,18 @@ def main():
     if args.model_type == "campplus":
         from src.models.campplus_wrapper import CAMPlusWrapper
         model = CAMPlusWrapper(freeze_frontend=False, emb_dim=args.emb_dim)
-    else:
+    elif args.model_type == "eres2net":
         from src.models.eres2net_wrapper import ERes2NetWrapper
         model = ERes2NetWrapper(freeze_frontend=False, emb_dim=args.emb_dim)
+    elif args.model_type == "eres2netv2":
+        from src.models.eres2netv2_wrapper import ERes2NetV2Wrapper
+        model = ERes2NetV2Wrapper(freeze_frontend=False, emb_dim=args.emb_dim)
+    elif args.model_type == "ecapa":
+        from src.models.ecapa_tdnn import ECAPA_TDNN
+        model = ECAPA_TDNN(n_mels=80, channels=512, emb_dim=args.emb_dim, scale=8, sr=16000)
+    else:  # wavlm
+        from src.models.wavlm_wrapper import WavLMWrapper
+        model = WavLMWrapper(emb_dim=192, freeze_backbone=False, use_grad_checkpointing=False)
 
     ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
     model.load_state_dict(ckpt["encoder_state"])

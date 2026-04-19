@@ -1,0 +1,37 @@
+# PyTorch (install separately with CUDA index)
+# pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+torch==2.6.0
+torchaudio==2.6.0
+
+# Core
+numpy==2.4.4
+pandas==3.0.2
+scipy==1.17.1
+scikit-learn==1.8.0
+matplotlib==3.10.8
+tqdm==4.67.3
+PyYAML==6.0.3
+omegaconf==2.3.0
+filelock==3.28.0
+fsspec==2026.3.0
+requests==2.33.1
+
+# Audio
+soundfile==0.13.1
+librosa==0.11.0
+
+# ONNX
+onnxruntime-gpu==1.24.4
+onnx==1.21.0
+
+# HuggingFace / Transformers
+transformers==5.5.3
+huggingface-hub==1.11.0
+safetensors==0.7.0
+tokenizers==0.22.2
+
+# ModelScope (CAM++, ERes2Net)
+modelscope==1.35.4
+
+# Retrieval
+faiss-gpu-cu12==1.14.1.post1
