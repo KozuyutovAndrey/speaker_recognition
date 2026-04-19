@@ -13,14 +13,21 @@ ENV TRANSFORMERS_OFFLINE=1
 ENV HF_DATASETS_OFFLINE=1
 ENV MODELSCOPE_ENVIRONMENT=local
 
-# System deps + Python 3.12
-RUN apt-get update && apt-get install -y \
-    python3.12 python3.12-dev python3-pip \
-    ffmpeg libsndfile1 git curl \
+# System deps + Python 3.12 (via deadsnakes PPA — not in Ubuntu 22.04 default repos)
+RUN apt-get update && apt-get install -y software-properties-common curl && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && apt-get install -y \
+    python3.12 python3.12-dev python3.12-venv \
+    ffmpeg libsndfile1 git \
     && rm -rf /var/lib/apt/lists/*
 
+# Bootstrap pip for Python 3.12 (distutils removed in 3.12, system pip won't work)
+RUN python3.12 -m ensurepip --upgrade && \
+    python3.12 -m pip install --upgrade pip
+
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
-    && update-alternatives --install /usr/bin/python python python3.12 1
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1 \
+    && update-alternatives --install /usr/bin/pip pip /usr/local/bin/pip3.12 1
 
 WORKDIR /app
 
@@ -45,8 +52,8 @@ COPY infer.py .
 RUN python3 -c "\
 from modelscope.pipelines import pipeline; \
 from modelscope.utils.constant import Tasks; \
-pipeline(task=Tasks.speaker_verification, model='damo/speech_campplus_sv_en_voxceleb_16k'); \
-pipeline(task=Tasks.speaker_verification, model='damo/speech_eres2net_sv_en_voxceleb_16k'); \
+pipeline(task=Tasks.speaker_verification, model='damo/speech_campplus_sv_en_voxceleb_16k', model_revision='v1.0.2'); \
+pipeline(task=Tasks.speaker_verification, model='damo/speech_eres2net_sv_en_voxceleb_16k', model_revision='master'); \
 print('ModelScope models cached OK')"
 
 # Weights directory (populated in Step 1 before offline inference)

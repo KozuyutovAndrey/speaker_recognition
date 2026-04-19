@@ -1,6 +1,6 @@
 # Криптонит: Тембр — Speaker Retrieval
 
-**Команда:** AI Amigos | **Результат:** Public P@10 = 0.7439 (6-е место)
+**Команда:** AI Amigos | **Результат:** Public P@10 = 0.7439
 
 Решение задачи поиска похожих записей по голосу. Для каждой из 134 697 тестовых FLAC-записей находим 10 ближайших соседей по speaker embedding.
 
@@ -74,11 +74,10 @@ python infer.py \
 
 ```
 data/
-└── test_public/
-    ├── 000000.flac
-    ├── 000001.flac
-    └── ...
-extracted_data/
+├── test_public/
+│   ├── 000000.flac
+│   ├── 000001.flac
+│   └── ...
 └── test_public.csv     # колонка filepath: test_public/NNNNNN.flac
 weights/                # скачать на Шаге 1
 output/                 # сюда сохраняется submission.csv
@@ -109,7 +108,3 @@ output/                 # сюда сохраняется submission.csv
 | `--batch-size` | 64 | Батч инференса |
 
 ---
-
-## Запрещено (правила соревнования)
-
-- Датасет **VoxBlink2** и производные от него модели
