@@ -31,14 +31,17 @@ class ERes2NetWrapper(nn.Module):
     ):
         super().__init__()
 
+        import os
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
 
-        pipe = pipeline(
-            task=Tasks.speaker_verification,
-            model="damo/speech_eres2net_sv_en_voxceleb_16k",
-            model_revision="master",
-        )
+        model_id = "damo/speech_eres2net_sv_en_voxceleb_16k"
+        cache_root = os.environ.get("MODELSCOPE_CACHE", os.path.expanduser("~/.cache/modelscope"))
+        local_path = os.path.join(cache_root, "models", model_id)
+        if os.path.exists(local_path):
+            pipe = pipeline(task=Tasks.speaker_verification, model=local_path)
+        else:
+            pipe = pipeline(task=Tasks.speaker_verification, model=model_id, model_revision="master")
         eres2net_model = pipe.model
 
         self.embedding_model = eres2net_model.embedding_model

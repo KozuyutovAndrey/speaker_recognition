@@ -32,14 +32,17 @@ class CAMPlusWrapper(nn.Module):
     ):
         super().__init__()
 
+        import os
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks
 
-        pipe = pipeline(
-            task=Tasks.speaker_verification,
-            model="damo/speech_campplus_sv_en_voxceleb_16k",
-            model_revision="v1.0.2",
-        )
+        model_id = "damo/speech_campplus_sv_en_voxceleb_16k"
+        cache_root = os.environ.get("MODELSCOPE_CACHE", os.path.expanduser("~/.cache/modelscope"))
+        local_path = os.path.join(cache_root, "models", model_id)
+        if os.path.exists(local_path):
+            pipe = pipeline(task=Tasks.speaker_verification, model=local_path)
+        else:
+            pipe = pipeline(task=Tasks.speaker_verification, model=model_id, model_revision="v1.0.2")
         campplus_model = pipe.model  # SpeakerVerificationCAMPPlus
 
         self.embedding_model = campplus_model.embedding_model
